@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2046 - Игра</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2046</h1>
+            <div class="score-container">
+                <div class="score-box">
+                    <div class="score-label">Счет</div>
+                    <div class="score" id="score">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-label">Лучший</div>
+                    <div class="score" id="best-score">0</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="game-intro">
+            <p>Соединяйте числа и дойдите до <strong>2046!</strong></p>
+            <button class="restart-button" id="restart-btn">Новая игра</button>
+        </div>
+
+        <div class="game-container">
+            <div class="grid-container">
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+            </div>
+            <div class="tile-container" id="tile-container">
+            </div>
+        </div>
+
+        <div class="game-message" id="game-message">
+            <div class="message-container">
+                <div class="message-text" id="message-text"></div>
+                <button class="try-again-button" id="try-again-btn">Попробовать снова</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <p><strong>Как играть:</strong> Используйте стрелки на клавиатуре для перемещения плиток. Когда две плитки с одинаковыми числами соприкасаются, они сливаются в одну!</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
