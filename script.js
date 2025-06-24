@@ -1,8 +1,8 @@
-class Game2046 {
+class Game2048 {
     constructor() {
         this.grid = [];
         this.score = 0;
-        this.bestScore = parseInt(localStorage.getItem('bestScore2046')) || 0;
+        this.bestScore = parseInt(localStorage.getItem('bestScore2048')) || 0;
         this.won = false;
         this.over = false;
         
@@ -63,8 +63,8 @@ class Game2046 {
             }
             
             if (moved) {
-                this.addRandomTile();
-                this.updateDisplay();
+                const newTilePos = this.addRandomTile();
+                this.updateDisplay(newTilePos, this.mergedPositions || []);
                 
                 if (this.isWon()) {
                     this.showGameWon();
@@ -87,25 +87,28 @@ class Game2046 {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 if (this.grid[i][j] === 0) {
-                    emptyCells.push({x: i, y: j});
+                    emptyCells.push({row: i, col: j});
                 }
             }
         }
         
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            this.grid[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
+            this.grid[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 2 : 4;
+            return randomCell;
         }
+        return null;
     }
     
     move(direction) {
         let moved = false;
         const newGrid = JSON.parse(JSON.stringify(this.grid));
+        this.mergedPositions = [];
         
         if (direction === 'left') {
             for (let i = 0; i < 4; i++) {
                 const row = this.grid[i].filter(val => val !== 0);
-                const mergedRow = this.mergeRow(row);
+                const mergedRow = this.mergeRow(row, i, direction);
                 const newRow = mergedRow.concat(Array(4 - mergedRow.length).fill(0));
                 newGrid[i] = newRow;
                 
@@ -116,7 +119,7 @@ class Game2046 {
         } else if (direction === 'right') {
             for (let i = 0; i < 4; i++) {
                 const row = this.grid[i].filter(val => val !== 0);
-                const mergedRow = this.mergeRow(row.reverse()).reverse();
+                const mergedRow = this.mergeRow(row.reverse(), i, direction).reverse();
                 const newRow = Array(4 - mergedRow.length).fill(0).concat(mergedRow);
                 newGrid[i] = newRow;
                 
@@ -132,7 +135,7 @@ class Game2046 {
                         column.push(this.grid[i][j]);
                     }
                 }
-                const mergedColumn = this.mergeRow(column);
+                const mergedColumn = this.mergeRow(column, j, direction);
                 
                 for (let i = 0; i < 4; i++) {
                     const newValue = i < mergedColumn.length ? mergedColumn[i] : 0;
@@ -150,7 +153,7 @@ class Game2046 {
                         column.push(this.grid[i][j]);
                     }
                 }
-                const mergedColumn = this.mergeRow(column).reverse();
+                const mergedColumn = this.mergeRow(column, j, direction).reverse();
                 
                 for (let i = 0; i < 4; i++) {
                     const newValue = i >= (4 - mergedColumn.length) ? mergedColumn[i - (4 - mergedColumn.length)] : 0;
@@ -166,7 +169,7 @@ class Game2046 {
         return moved;
     }
     
-    mergeRow(row) {
+    mergeRow(row, lineIndex, direction) {
         const merged = [];
         let i = 0;
         
@@ -175,6 +178,16 @@ class Game2046 {
                 const mergedValue = row[i] * 2;
                 merged.push(mergedValue);
                 this.score += mergedValue;
+                
+                // Сохраняем позицию объединенной плитки для анимации
+                if (direction === 'left' || direction === 'right') {
+                    const col = direction === 'left' ? merged.length - 1 : 4 - merged.length;
+                    this.mergedPositions.push({row: lineIndex, col: col});
+                } else {
+                    const row = direction === 'up' ? merged.length - 1 : 4 - merged.length;
+                    this.mergedPositions.push({row: row, col: lineIndex});
+                }
+                
                 i += 2;
             } else {
                 merged.push(row[i]);
@@ -189,12 +202,12 @@ class Game2046 {
         return a.length === b.length && a.every((val, i) => val === b[i]);
     }
     
-    updateDisplay() {
+    updateDisplay(newTilePos = null, mergedPositions = []) {
         // Обновление счета
         this.scoreElement.textContent = this.score;
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
-            localStorage.setItem('bestScore2046', this.bestScore);
+            localStorage.setItem('bestScore2048', this.bestScore);
         }
         this.bestScoreElement.textContent = this.bestScore;
         
@@ -205,16 +218,29 @@ class Game2046 {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 if (this.grid[i][j] !== 0) {
-                    this.createTile(i, j, this.grid[i][j]);
+                    const isNew = newTilePos && newTilePos.row === i && newTilePos.col === j;
+                    const isMerged = mergedPositions.some(pos => pos.row === i && pos.col === j);
+                    this.createTile(i, j, this.grid[i][j], isNew, isMerged);
                 }
             }
         }
     }
     
-    createTile(row, col, value) {
+    createTile(row, col, value, isNew = false, isMerged = false) {
         const tile = document.createElement('div');
         tile.className = `tile tile-${value}`;
+        
+        if (isNew) {
+            tile.classList.add('tile-new');
+        }
+        if (isMerged) {
+            tile.classList.add('tile-merged');
+        }
+        
         tile.textContent = value;
+        tile.dataset.row = row;
+        tile.dataset.col = col;
+        tile.dataset.value = value;
         
         // Позиционирование плитки
         const x = col * 122; // 107px ширина + 15px отступ
@@ -224,6 +250,15 @@ class Game2046 {
         tile.style.top = y + 'px';
         
         this.tileContainer.appendChild(tile);
+        
+        // Удаление анимационных классов после завершения анимации
+        if (isNew || isMerged) {
+            setTimeout(() => {
+                tile.classList.remove('tile-new', 'tile-merged');
+            }, 300);
+        }
+        
+        return tile;
     }
     
     isWon() {
@@ -231,7 +266,7 @@ class Game2046 {
         
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
-                if (this.grid[i][j] === 2046) {
+                if (this.grid[i][j] === 2048) {
                     this.won = true;
                     return true;
                 }
@@ -288,5 +323,5 @@ class Game2046 {
 
 // Запуск игры при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    new Game2046();
+    new Game2048();
 });

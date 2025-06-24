@@ -137,7 +137,7 @@ h1 {
     font-size: 35px;
     font-weight: bold;
     color: #776e65;
-    transition: all 0.15s ease-in-out;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 10;
 }
 
@@ -153,25 +153,60 @@ h1 {
 .tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 30px; }
 .tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 25px; }
 .tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 25px; }
-.tile-2046 { background-color: #ff6b6b; color: #f9f6f2; font-size: 25px; }
+.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 25px; box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2); }
 
 .tile-new {
-    animation: appear 0.2s ease-in-out;
+    animation: appear 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .tile-merged {
-    animation: pop 0.2s ease-in-out;
+    animation: pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.tile-moving {
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes appear {
-    0% { opacity: 0; transform: scale(0); }
-    100% { opacity: 1; transform: scale(1); }
+    0% { 
+        opacity: 0; 
+        transform: scale(0) rotate(180deg); 
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(90deg);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0deg); 
+    }
 }
 
 @keyframes pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+    30% { transform: scale(1.15); }
+    60% { transform: scale(0.95); }
     100% { transform: scale(1); }
+}
+
+@keyframes slide-up {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-122px); }
+}
+
+@keyframes slide-down {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(122px); }
+}
+
+@keyframes slide-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-122px); }
+}
+
+@keyframes slide-right {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(122px); }
 }
 
 .game-message {
@@ -254,7 +289,7 @@ h1 {
         font-size: 20px;
     }
     
-    .tile-1024, .tile-2048, .tile-2046 {
+    .tile-1024, .tile-2048 {
         font-size: 16px;
     }
 }
